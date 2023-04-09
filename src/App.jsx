@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 import PostList from "./components/PostList";
@@ -6,28 +6,27 @@ import PostForm from "./components/PostForm";
 import PostFilter from "./components/PostFilter";
 import MyModal from "./components/MyModal";
 import MyButton from "./components/UI/button/MyButton";
+import { usePosts } from "./hooks/usePosts";
+import PostService from "./API/PostService";
 
 function App() {
-  const [posts, setPosts] = useState([
-    { id: 1, title: "а", body: "1" },
-    { id: 2, title: "красава", body: "3" },
-    { id: 3, title: "г ", body: "4" },
-    { id: 4, title: "д ", body: "2" },
-  ]);
+  const [posts, setPosts] = useState([]);
   const [filter, setFilter] = useState({ sort: "", query: "" });
   const [modal, setModal] = useState(false);
+  const [isPostLoading, setIsPostLoading] = useState(false);
 
-  //ниже сам механизм сортировки по значению
-  const sortedPosts = useMemo(() => {
-    if (filter.sort) {
-      //ниже строчка базовой сортировки где сравнивается a с b и на выходе мы получаем новый массив с уже отсортиров значениями
-      return [...posts].sort((a, b) =>
-        a[filter.sort].localeCompare(b[filter.sort])
-      );
-    }
-    return posts;
-  }, [filter.sort, posts]);
+  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  async function fetchPosts() {
+    setIsPostLoading(true);
+    const posts = await PostService.getAll();
+    setPosts(posts);
+    setIsPostLoading(false);
+  }
   //ниже функция создания поста
   const createPost = function (newPost) {
     setPosts([...posts, newPost]);
@@ -40,28 +39,24 @@ function App() {
     setPosts(posts.filter((p) => p.id !== post.id));
   };
 
-  //ниже функция которая возвращает отфильтрованный и отсортированный массив
-  const sortedAndSearchedPosts = useMemo(() => {
-    return sortedPosts.filter((post) =>
-      post.title.toLowerCase().includes(filter.query.toLowerCase())
-    );
-  }, [filter.query, sortedPosts]);
-
   return (
     <div className="App">
       <MyButton onClick={() => setModal(true)}>Создать пользователя</MyButton>
       <MyModal visible={modal} setVisible={setModal}>
         <PostForm createPost={createPost} />
       </MyModal>
-      <hr style={{ marginTop: "10px" }} />
       <PostFilter filter={filter} setFilter={setFilter} />
 
-      <PostList
-        removePost={removePost}
-        //в posts передает отсортированный и отфильтрованный массив
-        posts={sortedAndSearchedPosts}
-        title={"Список постов"}
-      />
+      {isPostLoading ? (
+        <h1>Идет загрузка....</h1>
+      ) : (
+        <PostList
+          removePost={removePost}
+          //в posts передает отсортированный и отфильтрованный массив
+          posts={sortedAndSearchedPosts}
+          title={"Список постов"}
+        />
+      )}
     </div>
   );
 }

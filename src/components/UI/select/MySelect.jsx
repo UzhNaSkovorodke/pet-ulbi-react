@@ -3,8 +3,8 @@ import styles from "./MySelect.module.css";
 
 function MySelect({ options, defaultValue, value, onChange }) {
   return (
-    <select value={value} onChange={(event) => onChange(event.target.value)}>
-      <option disabled value="">
+    <select onChange={(e) => onChange(e.target.value)}>
+      <option disabled value={value}>
         {defaultValue}
       </option>
       {options.map((option) => (

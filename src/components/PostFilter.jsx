@@ -4,7 +4,7 @@ import MySelect from "./UI/select/MySelect";
 
 function PostFilter({ filter, setFilter }) {
   return (
-    <div>
+    <div style={{ marginTop: "15px", marginBottom: "15px" }}>
       <MyInput
         value={filter.query}
         onChange={(e) => setFilter({ ...filter, query: e.target.value })}

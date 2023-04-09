@@ -12,3 +12,22 @@ h1 {
   display: flex;
   justify-content: space-between;
 }
+
+.post-enter {
+  transform: translateX(-350px);
+}
+
+.post-enter-active {
+  transform: translateX(0px);
+  transition: all 300ms ease-in;
+}
+
+.post-exit {
+  opacity: 1;
+}
+
+.post-exit-active {
+  transform: translateX(-350px);
+  opacity: 0;
+  transition: all 300ms ease-in;
+}
